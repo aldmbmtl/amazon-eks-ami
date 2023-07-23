@@ -72,6 +72,37 @@ sudo yum install -y \
   mdadm \
   pigz
 
+########
+# JUNO #
+########
+
+# Install epel repo
+sudo amazon-linux-extras install epel -y
+sudo yum update -y
+
+# Install the AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Sync down the latest AMD GPU drivers
+aws s3 cp --recursive s3://ec2-amd-linux-drivers/latest/ .
+tar -xf amdgpu-pro-*rhel*.tar.xz
+
+cd amdgpu-pro-*rhel*/
+
+# Install the AMD GPU drivers
+./amdgpu-pro-install -y --opencl=pal,legacy
+
+cd ..
+
+# Clean up
+rm -rfv aws* amdgpu-pro* aws
+
+#############
+#  END JUNO #
+#############
+
 # skip kernel version cleanup on al2023
 if ! cat /etc/*release | grep "al2023" > /dev/null 2>&1; then
   # Remove any old kernel versions. `--count=1` here means "only leave 1 kernel version installed"
